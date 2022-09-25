@@ -1,5 +1,5 @@
 
-<img height='250' src="./data/harrypotter.png">
+<img height='250' src="data/harrypotter.png">
 
 # Harry Potter Books
 
