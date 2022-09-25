@@ -1,0 +1,149 @@
+
+
+# Harry Potter
+
+books:
+
+- Philosopher's Stone
+- Chamber of Secrets
+- Prisoner of Azkaban
+- Goblet of Fire
+- Order of the Phoenix
+- Half-Blood Prince
+- Deathly Hallows
+
+```{r}
+library(tidyverse)
+library(tidytext)
+
+
+
+
+# devtools::install_github("bradleyboehmke/harrypotter")
+# books
+# library(harrypotter)
+
+# hp = harrypotter::philosophers_stone
+# due to naming conflicts of the color palette of the
+# same name I downloaded the data from the GitHub repo
+
+load("./philosophers_stone.rda")
+
+hp = philosophers_stone
+```
+
+
+Since Harry Potter books do not have chapters in the name like traditional books we could name
+the chapters then append them to a data frame.
+
+```{r}
+
+chapters = c("THE BOY WHO LIVED",
+             "THE VANISHING GLASS",
+             "THE LETTERS FROM NO ONE",
+             "THE KEEPER OF THE KEYS",
+             "DRAGON ALLEY",
+             "THE JOURNEY FROM PLAFORM NINE AND THREE-QUARTERS",
+             "THE SORTING HAT",
+             "THE POTIONS MASTER",
+             "THE MIDNIGHT DUEL",
+             "HALLOWEEN",
+             "QUIDDITCH",
+             "THE MIRROW OF ERUSED",
+             "NICOLAS FLAMEL",
+             "NORBERT THE NORWEGIAN RIDGEBACK",
+             "THE FORBIDDEN FOREST",
+             "THROUGH THE TRAPDOOR",
+             "THE MAN WITH TWO FACES"
+             )
+
+
+hp_df = tibble( chapters = chapters, text = hp)
+
+head(hp_df)
+
+```
+
+
+tokenize and clean up the text
+
+```{r}
+
+hp_df_tokens = hp_df %>% 
+  unnest_tokens(input = text, output = word )
+
+
+hp_clean = hp_df_tokens %>% 
+  anti_join(stop_words, by='word')
+
+head(hp_clean)
+```
+
+
+most common words by chapter, filter for words that occur more than 30 times
+
+```{r}
+hp_clean %>% 
+  group_by(chapters, word) %>% 
+  count(word, sort = T) %>% 
+  ungroup() %>% 
+  filter(n > 30)
+```
+
+
+
+
+```{r}
+# -- color palette pkg
+# install.packages("harrypotter")
+library(harrypotter)
+
+hp_clean %>% 
+  group_by(word) %>% 
+  count(word, sort = T) %>% 
+  ungroup() %>% 
+  top_n(20) %>% 
+  ggplot(
+    aes(x= n,
+        y= reorder(word,n),
+        fill= n
+        )
+  )+
+  geom_col(show.legend = F)+
+  ggdark::dark_mode()+
+  scale_fill_hp(option = "Gryffindor")+
+  labs(title = "Harry Potter: Philosophers Stone",
+       subtitle = "Top 20 words",
+       y="",
+       x="word count"
+       )+
+  theme(
+    plot.title = element_text(hjust = 0.5, 
+                              size = 14),
+    plot.subtitle = element_text(hjust = 0.5,
+                                 size = 13),
+    axis.text.y = element_text(size = 12, color = 'white')
+  )+
+  coord_cartesian(expand = F)
+  
+```
+
+
+
+CLEANED BOOK !
+
+```{r}
+df = read_csv("philosophers_stone.csv")
+head(df)
+```
+
+
+
+
+
+
+
+
+
+
+
